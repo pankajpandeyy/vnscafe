@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Pizzeria Vaatika | Assi Ghat Varanasi</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Poppins;}
+
+body{background:#0f0f0f;color:#fff;}
+
+header{
+background:url('https://images.unsplash.com/photo-1504674900247-0877df9cc836');
+height:90vh;
+background-size:cover;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+}
+
+header h1{font-size:40px;}
+header p{margin:10px 0;}
+
+header button{
+padding:10px 20px;
+background:#ffb703;
+border:none;
+cursor:pointer;
+font-weight:bold;
+}
+
+.menu{
+padding:30px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+}
+
+.card{
+background:#1c1c1c;
+border-radius:15px;
+overflow:hidden;
+transition:.3s;
+}
+
+.card:hover{transform:scale(1.03);}
+
+.card img{
+width:100%;
+height:180px;
+object-fit:cover;
+}
+
+.card-content{
+padding:15px;
+}
+
+.tag{
+font-size:12px;
+font-weight:bold;
+}
+
+.veg{color:#4caf50;}
+.nonveg{color:#f44336;}
+
+button.add{
+margin-top:10px;
+width:100%;
+padding:8px;
+background:#ffb703;
+border:none;
+cursor:pointer;
+}
+
+.cart-btn{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#ffb703;
+padding:15px;
+border-radius:50%;
+cursor:pointer;
+}
+
+.cart{
+position:fixed;
+right:-350px;
+top:0;
+width:350px;
+height:100%;
+background:#1a1a1a;
+padding:20px;
+transition:.4s;
+overflow:auto;
+}
+
+.cart.active{right:0;}
+
+.cart-item{
+display:flex;
+justify-content:space-between;
+margin:10px 0;
+}
+
+.qty button{padding:3px 8px;margin:0 3px;}
+
+.checkout{
+margin-top:20px;
+width:100%;
+padding:10px;
+background:#4caf50;
+border:none;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Pizzeria Vaatika</h1>
+<p>Sunset Pizza & Ganga Vibes at Assi Ghat</p>
+<button onclick="scrollToMenu()">Explore Menu</button>
+</header>
+
+<section class="menu" id="menu">
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1548365328-9f547fb0953c">
+<div class="card-content">
+<p class="tag veg">🟢 Veg</p>
+<h3>Farmhouse Pizza</h3>
+<p>₹299</p>
+<button class="add" onclick="addToCart('Farmhouse Pizza',299)">Add to Cart</button>
+</div>
+</div>
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1514517220031-7e3c4c0d0f39">
+<div class="card-content">
+<p class="tag nonveg">🔴 Non-Veg</p>
+<h3>Chicken Pizza</h3>
+<p>₹349</p>
+<button class="add" onclick="addToCart('Chicken Pizza',349)">Add to Cart</button>
+</div>
+</div>
+
+<div class="card">
+<img src="https://images.unsplash.com/photo-1525755662778-989d0524087e">
+<div class="card-content">
+<p class="tag veg">🟢 Veg</p>
+<h3>White Sauce Pasta</h3>
+<p>₹249</p>
+<button class="add" onclick="addToCart('Pasta',249)">Add to Cart</button>
+</div>
+</div>
+
+</section>
+
+<div class="cart-btn" onclick="toggleCart()">🛒</div>
+
+<div class="cart" id="cart">
+<h2>Your Cart</h2>
+<div id="cartItems"></div>
+<h3 id="total">Total: ₹0</h3>
+
+<select id="orderType">
+<option>Dine-in</option>
+<option>Takeaway</option>
+</select>
+
+<button class="checkout" onclick="checkout()">Proceed</button>
+</div>
+
+<script>
+let cart=[];
+
+function scrollToMenu(){
+document.getElementById("menu").scrollIntoView({behavior:"smooth"});
+}
+
+function toggleCart(){
+document.getElementById("cart").classList.toggle("active");
+}
+
+function addToCart(name,price){
+let item=cart.find(i=>i.name===name);
+
+if(item){
+item.qty++;
+}else{
+cart.push({name,price,qty:1});
+}
+
+renderCart();
+alert(name+" added");
+}
+
+function renderCart(){
+let html="";
+let total=0;
+
+cart.forEach((item,index)=>{
+total+=item.price*item.qty;
+
+html+=`
+<div class="cart-item">
+<div>${item.name} x ${item.qty}</div>
+<div class="qty">
+<button onclick="changeQty(${index},-1)">-</button>
+<button onclick="changeQty(${index},1)">+</button>
+<button onclick="removeItem(${index})">❌</button>
+</div>
+</div>
+`;
+});
+
+document.getElementById("cartItems").innerHTML=html;
+document.getElementById("total").innerText="Total: ₹"+total;
+}
+
+function changeQty(index,val){
+cart[index].qty+=val;
+
+if(cart[index].qty<=0){
+cart.splice(index,1);
+}
+
+renderCart();
+}
+
+function removeItem(index){
+cart.splice(index,1);
+renderCart();
+}
+
+function checkout(){
+if(cart.length===0){
+alert("Cart empty");
+return;
+}
+
+let type=document.getElementById("orderType").value;
+
+let msg="Order Type: "+type+"%0A";
+
+cart.forEach(item=>{
+msg+=item.name+" x "+item.qty+"%0A";
+});
+
+window.open("https://wa.me/919876543210?text="+msg);
+}
+</script>
+
+</body>
+</html>
