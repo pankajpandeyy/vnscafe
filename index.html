@@ -132,44 +132,84 @@ footer{text-align:center;padding:20px;background:#000;}
 <h3 id="total">Total: ₹0</h3>
 <button onclick="checkout()">Order</button>
 </div>
-
+  
 <script>
-function goTo(id){
-document.getElementById(id).scrollIntoView({behavior:"smooth"});
+let cart = [];
+
+function toggleCart() {
+  document.getElementById("cart").classList.toggle("active");
 }
 
-let cart=[];
+function addToCart(name, price) {
+  let found = false;
 
-function toggleCart(){
-document.getElementById("cart").classList.toggle("active");
+  for (let i = 0; i < cart.length; i++) {
+    if (cart[i].name === name) {
+      cart[i].qty += 1;
+      found = true;
+    }
+  }
+
+  if (!found) {
+    cart.push({ name: name, price: price, qty: 1 });
+  }
+
+  renderCart();
+  alert(name + " added to cart");
 }
 
-function addToCart(name,price){
-let item=cart.find(i=>i.name===name);
-if(item){item.qty++;}
-else{cart.push({name,price,qty:1});}
-renderCart();
+function renderCart() {
+  let cartHTML = "";
+  let total = 0;
+
+  for (let i = 0; i < cart.length; i++) {
+    total += cart[i].price * cart[i].qty;
+
+    cartHTML += `
+      <div>
+        ${cart[i].name} x ${cart[i].qty}
+        <button onclick="increase(${i})">+</button>
+        <button onclick="decrease(${i})">-</button>
+        <button onclick="removeItem(${i})">❌</button>
+      </div>
+    `;
+  }
+
+  document.getElementById("cartItems").innerHTML = cartHTML;
+  document.getElementById("total").innerText = "Total: ₹" + total;
 }
 
-function renderCart(){
-let html="";let total=0;
-cart.forEach((item,i)=>{
-total+=item.price*item.qty;
-html+=`${item.name} x ${item.qty} <button onclick="remove(${i})">❌</button><br>`;
-});
-document.getElementById("cartItems").innerHTML=html;
-document.getElementById("total").innerText="₹"+total;
+function increase(i) {
+  cart[i].qty++;
+  renderCart();
 }
 
-function remove(i){
-cart.splice(i,1);
-renderCart();
+function decrease(i) {
+  cart[i].qty--;
+  if (cart[i].qty <= 0) {
+    cart.splice(i, 1);
+  }
+  renderCart();
 }
 
-function checkout(){
-let msg="Order:%0A";
-cart.forEach(i=>{msg+=i.name+" x "+i.qty+"%0A";});
-window.open("https://wa.me/919876543210?text="+msg);
+function removeItem(i) {
+  cart.splice(i, 1);
+  renderCart();
+}
+
+function checkout() {
+  if (cart.length === 0) {
+    alert("Cart is empty");
+    return;
+  }
+
+  let message = "Order:%0A";
+
+  for (let i = 0; i < cart.length; i++) {
+    message += cart[i].name + " x " + cart[i].qty + "%0A";
+  }
+
+  window.open("https://wa.me/919876543210?text=" + message);
 }
 </script>
 
